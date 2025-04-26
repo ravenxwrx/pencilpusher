@@ -5,14 +5,15 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
+	"github.com/ravenxwrx/pencilpusher/pkg/logger"
 )
 
 var cfg *Config
 
 var defaultConfig = &Config{
 	Logging: Logging{
-		Level:  LogLevelInfo,
-		Format: LogTypeText,
+		Level:  logger.LogLevelInfo,
+		Format: logger.LogTypeText,
 	},
 }
 
@@ -31,7 +32,7 @@ func Load(path string) error {
 		return err
 	}
 
-	cfg = &c
+	setConfigValues(&c)
 
 	return nil
 }

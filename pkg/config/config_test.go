@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/ravenxwrx/pencilpusher/pkg/logger"
 	"github.com/stretchr/testify/require"
 )
 
@@ -43,8 +44,8 @@ func TestLoad(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, LogLevelDebug, Get().Logging.Level)
-			require.Equal(t, LogTypeJSON, Get().Logging.Format)
+			require.Equal(t, logger.LogLevelDebug, Get().Logging.Level)
+			require.Equal(t, logger.LogTypeJSON, Get().Logging.Format)
 		}
 		t.Run(name, tf)
 	}
@@ -55,8 +56,16 @@ func TestDefaultConfig(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(output, nil)))
 
 	cfg := Get()
-	require.Equal(t, LogLevelInfo, cfg.Logging.Level)
-	require.Equal(t, LogTypeText, cfg.Logging.Format)
+	require.Equal(t, logger.LogLevelInfo, cfg.Logging.Level)
+	require.Equal(t, logger.LogTypeText, cfg.Logging.Format)
 
 	require.Contains(t, output.String(), "Config is nil, using default config")
+}
+
+func TestPropagate(t *testing.T) {
+	err := Load("testdata/config.yaml")
+	require.NoError(t, err)
+
+	require.Equal(t, logger.LogLevelDebug, logger.LogLevel())
+	require.Equal(t, logger.LogTypeJSON, logger.LogFormat())
 }
