@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/google/uuid"
@@ -35,18 +36,18 @@ func (r *Runner) Start(queue chan Task) {
 				case event := <-task.GetLifecycle():
 					switch event.(type) {
 					case EventStart:
-						slog.Info("Task started", "task_id", task.GetID())
+						slog.Debug("Task started", "task_id", task.GetID())
 					case EventFailed:
-						slog.Error("Task failed", "task_id", task.GetID())
+						slog.Warn("Task failed", "task_id", task.GetID())
 					case EventCompleted:
-						slog.Info("Task completed", "task_id", task.GetID())
+						slog.Debug("Task completed", "task_id", task.GetID())
 					}
 				case <-done:
 					return
 				}
 			}
 		}()
-		task.Run()
+		task.Run(context.TODO())
 
 		r.Status = RunnerStatusIdle
 		slog.Debug("Runner finished task", "runner_id", r.ID, "task_id", task.GetID(), "status", r.Status)

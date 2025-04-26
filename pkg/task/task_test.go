@@ -1,11 +1,13 @@
 package task
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
@@ -42,6 +44,7 @@ func TestController(t *testing.T) {
 type MockTask struct {
 	ID        uuid.UUID
 	Status    string
+	Context   map[string]any
 	lifecycle chan Event
 }
 
@@ -57,11 +60,12 @@ func (t *MockTask) GetLifecycle() chan Event {
 	return t.lifecycle
 }
 
-func (t *MockTask) Run() error {
+func (t *MockTask) Run(ctx context.Context) error {
 	t.Status = TaskStatusRunning
 	t.lifecycle <- EventStart{Context: map[string]any{"task_id": t.ID}}
 
 	time.Sleep(1 * time.Second)
+	spew.Dump(t.Context)
 
 	t.Status = TaskStatusCompleted
 	t.lifecycle <- EventCompleted{Context: map[string]any{"task_id": t.ID}}
@@ -75,10 +79,12 @@ func TestTaskRun(t *testing.T) {
 
 	require.Equal(t, runnerCount, len(controller.runners))
 
+	id := uuid.New()
 	task := &MockTask{
-		ID:        uuid.New(),
+		ID:        id,
 		Status:    TaskStatusPending,
 		lifecycle: make(chan Event),
+		Context:   map[string]any{"my_task_id": id},
 	}
 
 	controller.Start()

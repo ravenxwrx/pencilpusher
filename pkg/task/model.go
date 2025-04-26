@@ -1,6 +1,8 @@
 package task
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 )
 
@@ -48,5 +50,5 @@ type Task interface {
 	GetID() uuid.UUID
 	GetStatus() string
 	GetLifecycle() chan Event
-	Run() error
+	Run(ctx context.Context) error
 }
