@@ -10,6 +10,7 @@ import (
 type Controller struct {
 	done    chan struct{}
 	queue   chan Task
+	tasks   map[uuid.UUID]Task
 	runners map[uuid.UUID]*Runner
 }
 
@@ -23,6 +24,7 @@ func NewController() *Controller {
 
 	return &Controller{
 		queue:   make(chan Task),
+		tasks:   make(map[uuid.UUID]Task),
 		runners: runners,
 	}
 }
@@ -60,4 +62,19 @@ Loop:
 
 		break
 	}
+}
+
+func (c *Controller) AddTask(task Task) {
+	c.queue <- task
+	c.tasks[task.GetID()] = task
+	slog.Debug("Task added to queue", "task_id", task.GetID())
+}
+
+func (c *Controller) GetTask(id uuid.UUID) Task {
+	task, ok := c.tasks[id]
+	if !ok {
+		return nil
+	}
+
+	return task
 }

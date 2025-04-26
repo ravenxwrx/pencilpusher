@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
@@ -65,7 +64,7 @@ func (t *MockTask) Run(ctx context.Context) error {
 	t.lifecycle <- EventStart{Context: map[string]any{"task_id": t.ID}}
 
 	time.Sleep(1 * time.Second)
-	spew.Dump(t.Context)
+	slog.Info("I'm running", "context", t.Context)
 
 	t.Status = TaskStatusCompleted
 	t.lifecycle <- EventCompleted{Context: map[string]any{"task_id": t.ID}}
@@ -88,13 +87,16 @@ func TestTaskRun(t *testing.T) {
 	}
 
 	controller.Start()
+	require.Equal(t, 0, len(controller.tasks))
 
-	controller.queue <- task
+	controller.AddTask(task)
+	require.Equal(t, 1, len(controller.tasks))
+	require.NotNil(t, controller.GetTask(id))
 
 	time.Sleep(15 * time.Millisecond)
 
-	require.Equal(t, TaskStatusRunning, task.GetStatus())
+	require.Equal(t, TaskStatusRunning, controller.GetTask(id).GetStatus())
 	time.Sleep(1 * time.Second)
-	require.Equal(t, TaskStatusCompleted, task.GetStatus())
+	require.Equal(t, TaskStatusCompleted, controller.GetTask(id).GetStatus())
 	controller.Stop()
 }
