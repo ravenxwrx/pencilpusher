@@ -53,8 +53,10 @@ func TestInitLogger(t *testing.T) {
 			err := logger.InitLogger()
 			if tt.expectError {
 				require.Error(t, err)
+
 				return
 			}
+
 			require.NoError(t, err)
 		}
 

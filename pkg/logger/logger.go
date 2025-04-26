@@ -8,6 +8,7 @@ import (
 
 func InitLogger() error {
 	var level slog.Level
+
 	switch LogLevel() {
 	case LogLevelDebug:
 		level = slog.LevelDebug
