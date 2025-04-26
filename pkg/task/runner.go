@@ -21,8 +21,12 @@ func NewRunner() *Runner {
 
 func (r *Runner) Start(queue chan Task) {
 	r.Status = RunnerStatusIdle
+	slog.Debug("Runner started", "runner_id", r.ID, "status", r.Status)
+
 	for task := range queue {
 		r.Status = RunnerStatusBusy
+		slog.Debug("Runner started task", "runner_id", r.ID, "task_id", task.GetID(), "status", r.Status)
+
 		done := make(chan struct{})
 
 		go func() {
@@ -45,7 +49,11 @@ func (r *Runner) Start(queue chan Task) {
 		task.Run()
 
 		r.Status = RunnerStatusIdle
+		slog.Debug("Runner finished task", "runner_id", r.ID, "task_id", task.GetID(), "status", r.Status)
 
 		close(done)
 	}
+
+	r.Status = RunnerStatusStopped
+	slog.Debug("Runner stopped", "runner_id", r.ID)
 }

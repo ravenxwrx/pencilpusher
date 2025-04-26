@@ -13,6 +13,7 @@ const (
 	RunnerStatusUnstarted = "not_started"
 	RunnerStatusIdle      = "idle"
 	RunnerStatusBusy      = "busy"
+	RunnerStatusStopped   = "stopped"
 )
 
 type Event interface {

@@ -1,6 +1,9 @@
 package task
 
 import (
+	"log/slog"
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -19,7 +22,6 @@ func NewController() *Controller {
 	}
 
 	return &Controller{
-		done:    make(chan struct{}),
 		queue:   make(chan Task),
 		runners: runners,
 	}
@@ -30,17 +32,32 @@ func (c *Controller) Start() {
 		go runner.Start(c.queue)
 	}
 
+	tt := time.Now()
+Loop:
 	for {
-		done := true
-
 		for _, runner := range c.runners {
 			if runner.Status == RunnerStatusUnstarted {
-				done = false
+				continue Loop
 			}
 		}
 
-		if done {
-			break
+		break
+	}
+
+	slog.Debug("All runners started", "time", time.Since(tt).String())
+}
+
+func (c *Controller) Stop() {
+	close(c.queue)
+
+Loop:
+	for {
+		for _, runner := range c.runners {
+			if runner.Status != RunnerStatusStopped {
+				continue Loop
+			}
 		}
+
+		break
 	}
 }

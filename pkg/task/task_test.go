@@ -19,21 +19,17 @@ func TestController(t *testing.T) {
 
 	controller.Start()
 
+	time.Sleep(10 * time.Millisecond)
+
 	for _, runner := range controller.runners {
-		require.Equal(t, RunnerStatusIdle, runner.Status)
+		require.Equal(t, RunnerStatusIdle, runner.Status, "runner %s is not idle", runner.ID)
 	}
 
-	stopTest := make(chan struct{})
-	timer := time.NewTimer(5 * time.Second)
+	controller.Stop()
 
-	go func() {
-		for range timer.C {
-			stopTest <- struct{}{}
-		}
-	}()
+	time.Sleep(10 * time.Millisecond)
 
-	<-stopTest
-	timer.Stop()
+	for _, runner := range controller.runners {
+		require.Equal(t, RunnerStatusStopped, runner.Status, "runner %s is not stopped", runner.ID)
+	}
 }
-
-// Check if the queue is empty
