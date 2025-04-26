@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -29,43 +30,46 @@ func NewController() *Controller {
 	}
 }
 
-func (c *Controller) Start() {
+func (c *Controller) Start() error {
 	for _, runner := range c.runners {
 		go runner.Start(c.queue)
 	}
 
 	tt := time.Now()
-Loop:
-	for {
-		for _, runner := range c.runners {
-			if runner.Status == RunnerStatusUnstarted {
-				time.Sleep(10 * time.Millisecond)
 
-				continue Loop
+	err := waitForRunners(c.runners, func(runners map[uuid.UUID]*Runner) bool {
+		for _, runner := range runners {
+			if runner.Status == RunnerStatusUnstarted {
+				return true
 			}
 		}
 
-		break
+		return false
+	})
+
+	if err != nil {
+		return err
 	}
 
 	slog.Debug("All runners started", "time", time.Since(tt).String())
+
+	return nil
 }
 
-func (c *Controller) Stop() {
+func (c *Controller) Stop() error {
 	close(c.queue)
 
-Loop:
-	for {
-		for _, runner := range c.runners {
+	err := waitForRunners(c.runners, func(runners map[uuid.UUID]*Runner) bool {
+		for _, runner := range runners {
 			if runner.Status != RunnerStatusStopped {
-				time.Sleep(10 * time.Millisecond)
-
-				continue Loop
+				return true
 			}
 		}
 
-		break
-	}
+		return false
+	})
+
+	return err
 }
 
 func (c *Controller) AddTask(task Task) {
@@ -81,4 +85,35 @@ func (c *Controller) GetTask(id uuid.UUID) Task {
 	}
 
 	return task
+}
+
+var errTimeout = fmt.Errorf("timeout")
+
+func waitForRunners(runners map[uuid.UUID]*Runner, call func(runners map[uuid.UUID]*Runner) bool) error {
+	timer := time.NewTicker(100 * time.Millisecond)
+	retries := 5
+
+Loop:
+	for {
+		select {
+		case <-timer.C:
+			retries--
+			if retries <= 0 {
+				break Loop
+			}
+
+			if call(runners) {
+				continue Loop
+			}
+
+			break Loop
+		}
+	}
+	timer.Stop()
+
+	if retries <= 0 {
+		return errTimeout
+	}
+
+	return nil
 }
