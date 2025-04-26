@@ -60,7 +60,9 @@ func (t *MockTask) GetLifecycle() chan Event {
 func (t *MockTask) Run() error {
 	t.Status = TaskStatusRunning
 	t.lifecycle <- EventStart{Context: map[string]any{"task_id": t.ID}}
+
 	time.Sleep(1 * time.Second)
+
 	t.Status = TaskStatusCompleted
 	t.lifecycle <- EventCompleted{Context: map[string]any{"task_id": t.ID}}
 
