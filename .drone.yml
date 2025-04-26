@@ -6,6 +6,9 @@ steps:
   -
     name: fetch
     image: alpine/git
+    when:
+      event:
+        - push
     commands:
       - git fetch --tags
 
