@@ -39,6 +39,8 @@ Loop:
 	for {
 		for _, runner := range c.runners {
 			if runner.Status == RunnerStatusUnstarted {
+				time.Sleep(10 * time.Millisecond)
+
 				continue Loop
 			}
 		}
@@ -56,6 +58,8 @@ Loop:
 	for {
 		for _, runner := range c.runners {
 			if runner.Status != RunnerStatusStopped {
+				time.Sleep(10 * time.Millisecond)
+
 				continue Loop
 			}
 		}
