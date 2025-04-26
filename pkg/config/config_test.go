@@ -33,6 +33,8 @@ func TestLoad(t *testing.T) {
 
 	for name, tt := range tests {
 		tf := func(t *testing.T) {
+			cfg = nil
+
 			err := Load(tt.path)
 			if tt.expectErr {
 				require.Error(t, err)
