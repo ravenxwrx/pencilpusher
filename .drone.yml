@@ -6,15 +6,29 @@ steps:
   -
     name: fetch
     image: alpine/git
+    when:
+      event:
+        - push
     commands:
       - git fetch --tags
 
   -
-    name: lint and test
+    name: lint
     image: golang:1.23
+    when:
+      event:
+        - push
     commands:
       - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.0.2
       - golangci-lint run ./...
+
+  -
+    name: test
+    image: golang:1.23
+    when:
+      event:
+        - push
+    commands:
       - go test -cover ./...
       - echo -n $(git describe --tags --abbrev=0) > .tags
   
