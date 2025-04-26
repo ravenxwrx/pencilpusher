@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
+	"github.com/ravenxwrx/pencilpusher/pkg/http"
 	"github.com/ravenxwrx/pencilpusher/pkg/logger"
 )
 
@@ -14,6 +15,9 @@ var defaultConfig = &Config{
 	Logging: Logging{
 		Level:  logger.LogLevelInfo,
 		Format: logger.LogTypeText,
+	},
+	Http: Http{
+		Address: http.BindAddr(),
 	},
 }
 
