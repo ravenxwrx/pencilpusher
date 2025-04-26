@@ -34,6 +34,7 @@ func Load(path string) error {
 func Get() *Config {
 	if cfg == nil {
 		slog.Warn("Config is nil, using default config")
+
 		return defaultConfig
 	}
 

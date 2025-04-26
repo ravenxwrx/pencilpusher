@@ -36,6 +36,7 @@ func TestLoad(t *testing.T) {
 			err := Load(tt.path)
 			if tt.expectErr {
 				require.Error(t, err)
+
 				return
 			}
 
