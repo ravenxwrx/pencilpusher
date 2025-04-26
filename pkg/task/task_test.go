@@ -12,6 +12,7 @@ func TestController(t *testing.T) {
 	controller := NewController()
 
 	require.Equal(t, len(controller.runners), RunnerCount())
+
 	for _, runner := range controller.runners {
 		require.Equal(t, RunnerStatusUnstarted, runner.Status)
 	}

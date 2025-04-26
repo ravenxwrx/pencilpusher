@@ -24,6 +24,7 @@ func (r *Runner) Start(queue chan Task) {
 	for task := range queue {
 		r.Status = RunnerStatusBusy
 		done := make(chan struct{})
+
 		go func() {
 			for {
 				select {
@@ -42,7 +43,9 @@ func (r *Runner) Start(queue chan Task) {
 			}
 		}()
 		task.Run()
+
 		r.Status = RunnerStatusIdle
+
 		close(done)
 	}
 }

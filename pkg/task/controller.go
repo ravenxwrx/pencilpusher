@@ -12,6 +12,7 @@ type Controller struct {
 
 func NewController() *Controller {
 	runners := make(map[uuid.UUID]*Runner)
+
 	for i := 0; i < RunnerCount(); i++ {
 		runner := NewRunner()
 		runners[runner.ID] = runner
@@ -31,6 +32,7 @@ func (c *Controller) Start() {
 
 	for {
 		done := true
+
 		for _, runner := range c.runners {
 			if runner.Status == RunnerStatusUnstarted {
 				done = false
