@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	yaml "sigs.k8s.io/yaml/goyaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 var cfg *Config
@@ -24,9 +24,14 @@ func Load(path string) error {
 	defer fp.Close()
 
 	decoder := yaml.NewDecoder(fp)
-	if err := decoder.Decode(&cfg); err != nil {
+
+	var c Config
+
+	if err := decoder.Decode(&c); err != nil {
 		return err
 	}
+
+	cfg = &c
 
 	return nil
 }
@@ -34,6 +39,7 @@ func Load(path string) error {
 func Get() *Config {
 	if cfg == nil {
 		slog.Warn("Config is nil, using default config")
+
 		return defaultConfig
 	}
 
