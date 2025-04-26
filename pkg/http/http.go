@@ -1,12 +1,16 @@
 package http
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 type Server struct {
 	*http.Server
+
+	closed chan struct{}
 }
 
 func (s *Server) Start() error {
@@ -25,10 +29,6 @@ func (s *Server) Start() error {
 	return nil
 }
 
-func (s *Server) Shutdown() error {
-	return s.Close()
-}
-
 func New() *Server {
 	s := &http.Server{
 		Addr:         BindAddr(),
@@ -39,7 +39,25 @@ func New() *Server {
 
 	return &Server{
 		Server: s,
+
+		closed: make(chan struct{}),
 	}
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	timeout := 5 * time.Second
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	err := s.Server.Shutdown(ctx)
+	close(s.closed)
+
+	return err
+}
+
+func (s *Server) Closed() <-chan struct{} {
+	return s.closed
 }
 
 func mux() *http.ServeMux {

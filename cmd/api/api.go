@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log/slog"
 	"os"
@@ -18,6 +19,8 @@ func main() {
 	flag.StringVar(&configPath, "config", "./config.yaml", "Path to the config file")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	if err := config.Load(configPath); err != nil {
 		slog.Error("Failed to load config", "error", err)
 		os.Exit(1)
@@ -33,8 +36,10 @@ func main() {
 	<-signalChan
 	slog.Info("Received interrupt signal, shutting down")
 
-	if err := httpServer.Shutdown(); err != nil {
-		slog.Error("Failed to shut down server", "error", err)
+	if err := httpServer.Shutdown(ctx); err != nil {
+		slog.Error("Failed to shut down HTTP service", "error", err)
 		os.Exit(1)
 	}
+
+	<-httpServer.Closed()
 }
