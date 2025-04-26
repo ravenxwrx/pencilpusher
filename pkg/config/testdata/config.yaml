@@ -1,3 +1,5 @@
 logging:
   level: debug
   format: json
+http:
+  address: ":9090"

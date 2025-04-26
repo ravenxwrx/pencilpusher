@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/ravenxwrx/pencilpusher/pkg/http"
 	"github.com/ravenxwrx/pencilpusher/pkg/logger"
 	"github.com/stretchr/testify/require"
 )
@@ -59,6 +60,8 @@ func TestDefaultConfig(t *testing.T) {
 	require.Equal(t, logger.LogLevelInfo, cfg.Logging.Level)
 	require.Equal(t, logger.LogTypeText, cfg.Logging.Format)
 
+	require.Equal(t, ":8080", cfg.Http.Address)
+
 	require.Contains(t, output.String(), "Config is nil, using default config")
 }
 
@@ -68,4 +71,6 @@ func TestPropagate(t *testing.T) {
 
 	require.Equal(t, logger.LogLevelDebug, logger.LogLevel())
 	require.Equal(t, logger.LogTypeJSON, logger.LogFormat())
+
+	require.Equal(t, ":9090", http.BindAddr())
 }
